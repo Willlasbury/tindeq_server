@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from tindeq import TindeqHandler
+
 app = FastAPI()
 
 origins = ["http://127.0.0.1:5173"]
@@ -13,9 +15,18 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+tindeq = TindeqHandler
+
 
 
 # todo: handle CORS
-@app.get("/test")
+@app.get("/")
 async def root():
-    return {"message": "Hellofdsa World"}
+    return {"message": "Hello World"}
+
+@app.post("/")
+async def getTindeqData(data):
+    print(data)
+    x = tindeq.handleData(data)
+    print(x)
+    return 

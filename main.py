@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 
 from tindeq import TindeqHandler
 
@@ -17,7 +18,8 @@ app.add_middleware(
 
 tindeq = TindeqHandler
 
-
+class tindeqData(BaseModel):
+    bytes: str
 
 # todo: handle CORS
 @app.get("/")
@@ -25,8 +27,9 @@ async def root():
     return {"message": "Hello World"}
 
 @app.post("/")
-async def getTindeqData(data):
-    print(data)
-    x = tindeq.handleData(data)
-    print(x)
-    return 
+async def getTindeqData(data: tindeqData):
+    try:
+        print('data: ', data)
+    except:
+        print('some error')
+    return 'hi'

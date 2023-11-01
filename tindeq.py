@@ -1,11 +1,19 @@
 import struct
+import json
 
 class TindeqHandler:
-    def __init__ (self, data):
+    def __init__ (self):
         self.data = None
 
-    def handleData(self, data):
-        handler = struct.Struct("<fl")
-        self.data = handler.unpack(data)
-        print(self.data)
-        return self.data
+    @classmethod
+    def handleData(self, str):
+        try:
+            # convert data into an array
+            nums = str.split(' ')
+            print('bytes: ', nums)
+            self.data = struct.Struct.unpack("<fl", nums)
+            
+            print('last', self.data)
+            return self.data
+        except:
+            return 400

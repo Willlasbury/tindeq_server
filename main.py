@@ -29,7 +29,8 @@ async def root():
 @app.post("/")
 async def getTindeqData(data: tindeqData):
     try:
-        print('data: ', data)
+        res = tindeq.handleData(data.bytes)
+        # print(x)
+        return res
     except:
-        print('some error')
-    return 'hi'
+        return 'error'

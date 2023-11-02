@@ -9,26 +9,28 @@ class TindeqHandler:
     def handleData(self, str):
         try:
             # convert data into an array
-            y = str.split(' ')
-            # print(y)
+            arr = str.split(' ')
+            
+            # turn data from stings to ints
             nums = []
-            for num in y:
+            for num in arr:
                 b = int(num)
                 nums.append(b)
-            nums = bytes(nums)
-            print('nums: ', nums)
 
+            # create a byte array 
+            nums = bytes(nums)
+
+            # create struct objects to translate data 
             data_struct = struct.Struct("<fl")
             info_struct = struct.Struct("<bb")
-            kind, size = info_struct.unpack(nums[:2])
-            print('kind, size', kind, size)
-            for x,s  in data_struct.iter_unpack(nums[2:]):
-                print('x, s: ', x, s)
-                
 
-            print('\ntest\n')
-            # print('last', self.data)
-            # return self.data
+            # get type of response and the data size from first two indexes
+            kind, size = info_struct.unpack(nums[:2])
+
+            # get weight and time from rest of list
+            for weight,useconds  in data_struct.iter_unpack(nums[2:]):
+                print('weight, useconds: ', weight, useconds)
+                
             return 'hi'
         except:
             print('\nerror\n')

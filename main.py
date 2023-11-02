@@ -1,5 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+
+from tindeq import TindeqHandler
 
 app = FastAPI()
 
@@ -13,9 +16,21 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+tindeq = TindeqHandler
 
+class tindeqData(BaseModel):
+    bytes: str
 
 # todo: handle CORS
-@app.get("/test")
+@app.get("/")
 async def root():
-    return {"message": "Hellofdsa World"}
+    return {"message": "Hello World"}
+
+@app.post("/")
+async def getTindeqData(data: tindeqData):
+    try:
+        res = tindeq.handleData(data.bytes)
+        # print(x)
+        return res
+    except:
+        return 'error'

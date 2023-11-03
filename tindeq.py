@@ -1,8 +1,9 @@
 import struct
-import json
 from fastapi import HTTPException
+
 class TindeqHandler:
-    def __init__ (self):
+    def __init__ (self, session):
+        self.session = session
         self.data = None
 
     @classmethod
@@ -24,7 +25,7 @@ class TindeqHandler:
             data_struct = struct.Struct("<fl")
             info_struct = struct.Struct("<bb")
 
-            # get type of response and the data size from first two indexes
+            # get type of response (see tindeq api) and the data size from first two indexes
             kind, size = info_struct.unpack(nums[:2])
 
             # get weight and time from rest of list

@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 from tindeq import TindeqHandler
+from session import Session
 
 app = FastAPI()
 
@@ -15,8 +16,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-tindeq = TindeqHandler
+session = Session()
+tindeq = TindeqHandler(session)
 
 class tindeqData(BaseModel):
     bytes: str
@@ -30,7 +31,7 @@ async def root():
 async def getTindeqData(data: tindeqData):
     try:
         res = tindeq.handleData(data.bytes)
-        # print(x)
+        
         return res
     except:
         return 'error'

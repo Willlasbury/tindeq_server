@@ -1,12 +1,14 @@
 import struct
 from fastapi import HTTPException
+# from session import Session
+
+
 
 class TindeqHandler:
-    def __init__ (self, session):
+    def __init__(self, session):
         self.session = session
-        self.data = None
 
-    @classmethod
+
     def handleData(self, str):
         try:
             # convert data into an array
@@ -27,12 +29,20 @@ class TindeqHandler:
 
             # get type of response (see tindeq api) and the data size from first two indexes
             kind, size = info_struct.unpack(nums[:2])
-
             # get weight and time from rest of list
-            for weight,useconds  in data_struct.iter_unpack(nums[2:]):
-                print('weight, useconds: ', weight, useconds)
-                
-            return 'hi'
+            for weight, useconds  in data_struct.iter_unpack(nums[2:]):
+                self.session.log_force_sample(time=useconds, weight=weight)
+
+            # grab average data
+            mean = self.session.mean()
+
+            # clear weight before next read
+            self.session.clear()
+
+            return mean
         except:
             print('\nerror\n')
             return HTTPException(status_code=400, detail='some error')
+        
+    def handleCFT(self, time, weight):
+        pass

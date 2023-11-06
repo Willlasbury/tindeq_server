@@ -2,8 +2,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from tindeq import TindeqHandler
-from session import Session
 from schemas.req.tindeqData import tindeqData
+from schemas.res.weightRes import weightData
 
 app = FastAPI()
 

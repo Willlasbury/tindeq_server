@@ -5,9 +5,6 @@ from fastapi import HTTPException
 
 
 class TindeqHandler:
-    def __init__(self, session):
-        self.session = session
-
 
     def handleData(self, str):
         try:
@@ -28,18 +25,21 @@ class TindeqHandler:
             info_struct = struct.Struct("<bb")
 
             # get type of response (see tindeq api) and the data size from first two indexes
-            kind, size = info_struct.unpack(nums[:2])
+            type, size = info_struct.unpack(nums[:2])
+
             # get weight and time from rest of list
             for weight, useconds  in data_struct.iter_unpack(nums[2:]):
-                self.session.log_force_sample(time=useconds, weight=weight)
+                print('weight, useconds: ', weight, useconds)
+                
+            #     self.session.log_force_sample(time=useconds, weight=weight)
 
-            # grab average data
-            mean = self.session.mean()
+            # # grab average data
+            # mean = self.session.mean()
 
-            # clear weight before next read
-            self.session.clear()
+            # # clear weight before next read
+            # self.session.clear()
 
-            return mean
+            return 
         except:
             print('\nerror\n')
             return HTTPException(status_code=400, detail='some error')

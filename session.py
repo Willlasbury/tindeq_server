@@ -1,5 +1,6 @@
 import numpy as np
 
+# Not RESTful need to add database to manage data
 class Session:
     
     def __init__(self):

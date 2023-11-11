@@ -2,8 +2,12 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from tindeq import TindeqHandler
-from schemas.req.tindeqData import tindeqData
-from schemas.res.weightRes import weightData
+from schemas.req.tindeqData import TindeqData
+from schemas.res.weightRes import WeightRes
+
+import os
+from dotenv import load_dotenv
+load_dotenv()
 
 app = FastAPI()
 
@@ -18,18 +22,19 @@ app.add_middleware(
 )
 
 tindeq = TindeqHandler()
-
-
+db_url = os.getenv('SUPABASE_URL')
+print('db_url: ', db_url)
 # todo: handle CORS
 @app.get("/")
 async def root():
     return {"message": "Hello World"}
 
+# todo: add response schema
 @app.post("/")
-async def getTindeqData(data: tindeqData):
+async def getTindeqData(data: TindeqData):
     try:
         res = tindeq.handleData(data.bytes)
-        
+        print(res)
         return res
     except:
         return 'error'

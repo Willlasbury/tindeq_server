@@ -1,4 +1,4 @@
 from pydantic import BaseModel
 
-class tindeqData(BaseModel):
+class TindeqData(BaseModel):
     bytes: str

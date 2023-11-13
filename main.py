@@ -4,10 +4,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from tindeq import TindeqHandler
 from schemas.req.tindeqData import TindeqData
 from schemas.res.weightRes import WeightRes
+from schemas.req.weightData import Weight
 
 import os
 from dotenv import load_dotenv
 load_dotenv()
+
+from supabase import create_client, Client
 
 app = FastAPI()
 
@@ -22,9 +25,10 @@ app.add_middleware(
 )
 
 tindeq = TindeqHandler()
-db_url = os.getenv('SUPABASE_URL')
-print('db_url: ', db_url)
-# todo: handle CORS
+
+
+
+
 @app.get("/")
 async def root():
     return {"message": "Hello World"}
@@ -38,3 +42,14 @@ async def getTindeqData(data: TindeqData):
         return res
     except:
         return 'error'
+
+# route for testing supabase connection
+# ONLY WORKS WITH RLS DISABLED ON SUPABASE TABLE
+@app.post("/insert")
+async def insert(data: Weight):
+    value = {'weight':data.weight}
+    url : str = os.getenv('SUPABASE_URL')
+    key : str = os.getenv('API_KEY')
+    supabase: Client = create_client(url, key)
+    res = supabase.table('max_weight').insert(value).execute()
+    return res

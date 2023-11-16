@@ -29,23 +29,22 @@ tindeq = TindeqHandler()
 
 
 
-@app.get("/")
+@app.get("/tindeq")
 async def root():
     return {"message": "Hello World"}
 
 # todo: add response schema
-@app.post("/")
+@app.post("/tindeq")
 async def getTindeqData(data: TindeqData):
     try:
         res = tindeq.handleData(data.bytes)
-        print(res)
         return res
     except:
         return 'error'
 
 # route for testing supabase connection
 # ONLY WORKS WITH RLS DISABLED ON SUPABASE TABLE
-@app.post("/insert")
+@app.post("/measurement")
 async def insert(data: Weight):
     value = {'weight':data.weight}
     url : str = os.getenv('SUPABASE_URL')

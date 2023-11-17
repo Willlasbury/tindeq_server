@@ -52,3 +52,10 @@ async def insert(data: Weight):
     supabase: Client = create_client(url, key)
     res = supabase.table('max_weight').insert(value).execute()
     return res
+
+
+@app.post("/max_weight")
+async def handle_max_weight(data: Weight):
+    print('\ntest\n')
+    print(data.weight)
+    return data.weight

@@ -22,5 +22,4 @@ async def handle_max_weight(data: Weight):
     # need to check what supabase errors look like
     if not res.data[0]:
         raise HTTPException(status_code=502, detail="Data not added to database")
-    print('res.data[0]: ', res.data[0])
     return res.data[0]

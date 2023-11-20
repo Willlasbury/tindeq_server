@@ -38,3 +38,9 @@ async def create_max_weight(data: Weight):
         raise HTTPException(status_code=502, detail="Data not added to database")
 
     return res.data[0]
+
+# Delete this end point as soon as you want to store real data
+@router.delete("")
+async def delete_max_weights():
+    res = supabase.table('max_weight').delete().neq('id', 0).execute()
+    return res

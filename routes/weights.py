@@ -9,17 +9,18 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+url: str = os.getenv("SUPABASE_URL")
+key: str = os.getenv("API_KEY")
+
+supabase: Client = create_client(url, key)
+
+
 router = APIRouter(prefix="/weights")
 
 
 # ONLY WORKS WITH RLS DISABLED ON SUPABASE TABLE
 @router.get("", response_model=list[MaxWeightRes])
 async def get_max_weights():
-    url: str = os.getenv("SUPABASE_URL")
-    key: str = os.getenv("API_KEY")
-
-    supabase: Client = create_client(url, key)
-
     res = supabase.table("max_weight").select("*").execute()
     if res.data == []:
         raise HTTPException(status_code=404, detail="Could not find any data")
@@ -29,11 +30,6 @@ async def get_max_weights():
 @router.post("", status_code=status.HTTP_201_CREATED, response_model=MaxWeightRes)
 async def create_max_weight(data: Weight):
     value = {"weight": data.weight}
-
-    url: str = os.getenv("SUPABASE_URL")
-    key: str = os.getenv("API_KEY")
-
-    supabase: Client = create_client(url, key)
 
     res = supabase.table("max_weight").insert(value).execute()
 

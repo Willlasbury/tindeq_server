@@ -12,7 +12,7 @@ seeds = []
 
 for i in range(1,5):
     rand = i * np.random.random() * 10
-    for j in range(1, 3):
+    for j in range(3, 5):
         extra = rand * j
         seeds.append(round(extra,1))
 

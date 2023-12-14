@@ -3,8 +3,7 @@ from routes.weights import delete_max_weights
 from routes.tindeq import root
 import numpy as np
 
-from schemas.seeds.weight import Weight
-
+from models.weight import Weight
 
 import asyncio
 

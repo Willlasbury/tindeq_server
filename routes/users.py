@@ -3,6 +3,7 @@ from fastapi import APIRouter, HTTPException, status
 from supabase import create_client, Client
 
 from schemas.res.users import User
+from schemas.res.login import Login
 
 import os
 from dotenv import load_dotenv
@@ -19,7 +20,7 @@ router = APIRouter(prefix="/users")
 
 
 @router.get("/test")
-async def get_all_users():
+async def get_users_test():
     return {
         "message": "test success"
     }
@@ -38,5 +39,19 @@ async def create_user(data:User):
         "email": data.email,
         "password": data.password,
     }
+
+    #todo: create error handling 
     res = supabase.auth.sign_up(user)
+    return res
+
+@router.post("/login")
+async def create_user(data:Login):
+    user = {
+        "email": data.email,
+        "password": data.password,
+    }
+    #todo: create error handling 
+    print('user: ', user) 
+    res = supabase.auth.sign_in_with_password(user)
+    print('res: ', res)
     return res

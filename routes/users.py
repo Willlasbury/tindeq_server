@@ -34,6 +34,7 @@ async def get_all_users():
 
 @router.post("")
 async def create_user(data:User):
+    print('data: ', data)
     user = {
         "display_name": data.display_name,
         "email": data.email,
@@ -50,8 +51,7 @@ async def create_user(data:Login):
         "email": data.email,
         "password": data.password,
     }
-    #todo: create error handling 
-    print('user: ', user) 
+
     res = supabase.auth.sign_in_with_password(user)
     print('res: ', res)
     return res

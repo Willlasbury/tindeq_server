@@ -15,23 +15,23 @@ key: str = os.getenv("API_KEY")
 supabase: Client = create_client(url, key)
 
 
-router = APIRouter(prefix="/weights")
+router = APIRouter(prefix="/max_pull")
 
 
 # ONLY WORKS WITH RLS DISABLED ON SUPABASE TABLE
 @router.get("", response_model=list[MaxWeightRes])
-async def get_max_weights():
-    res = supabase.table("max_weight").select("*").execute()
+async def get_max_pulls():
+    res = supabase.table("max_pull").select("*").execute()
     if res.data == []:
-        raise HTTPException(status_code=404, detail="Could not find any data")
+        raise HTTPException(status_code=404, detail="Could not find any data") 
     return res.data
 
 
 @router.post("", status_code=status.HTTP_201_CREATED, response_model=MaxWeightRes)
-async def create_max_weight(data: Weight):
+async def create_max_pull(data: Weight):
     value = {"weight": data.weight}
 
-    res = supabase.table("max_weight").insert(value).execute()
+    res = supabase.table("max_pull").insert(value).execute()
 
     # need to check what supabase errors look like
     if res.data == []:
@@ -41,6 +41,6 @@ async def create_max_weight(data: Weight):
 
 # Delete this end point as soon as you want to store real data
 @router.delete("")
-async def delete_max_weights():
-    res = supabase.table('max_weight').delete().neq('id', 0).execute()
+async def delete_max_pulls():
+    res = supabase.table('max_pull').delete().neq('id', 0).execute()
     return res

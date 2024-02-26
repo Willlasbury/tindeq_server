@@ -23,7 +23,7 @@ router = APIRouter(prefix="/max_pull")
 async def get_max_pulls():
     res = supabase.table("max_pull").select("*").execute()
     if res.data == []:
-        raise HTTPException(status_code=404, detail="Could not find any data")
+        raise HTTPException(status_code=404, detail="Could not find any data") 
     return res.data
 
 

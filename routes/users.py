@@ -1,5 +1,4 @@
-from fastapi import APIRouter
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, Request
 from supabase import create_client, Client
 
 from schemas.res.users import User
@@ -19,11 +18,15 @@ router = APIRouter(prefix="/users")
 
 
 
-@router.get("/test")
-async def get_users_test():
-    return {
-        "message": "test success"
-    }
+@router.get("/token")
+async def check_session_token(request: Request):
+    access_token = request.headers.get("Authorization")
+    refresh_token = request.headers.get("Refresh-Token")
+    res = supabase.auth.set_session(access_token, refresh_token)
+    if res.user:
+        return res
+    else: 
+       raise HTTPException(status_code=404, detail="Could not refresh token")
 
 @router.get("")
 async def get_all_users():
@@ -34,14 +37,12 @@ async def get_all_users():
 
 @router.post("")
 async def create_user(data:User):
-    print('data: ', data)
     user = {
         "display_name": data.display_name,
         "email": data.email,
         "password": data.password,
     }
 
-    #todo: create error handling 
     res = supabase.auth.sign_up(user)
     return res
 
@@ -53,5 +54,4 @@ async def create_user(data:Login):
     }
 
     res = supabase.auth.sign_in_with_password(user)
-    print('res: ', res)
     return res

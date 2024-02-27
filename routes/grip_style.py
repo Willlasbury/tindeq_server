@@ -15,13 +15,6 @@ supabase: Client = create_client(url, key)
 
 router = APIRouter(prefix="/style")
 
-@router.get("")
-async def get_style():
-    res = supabase.auth.get_style()
-    if res.data == []:
-        raise HTTPException(status_code=404, detail="Could not find any data")
-    return res.data
-
 @router.post("")
 async def create_style(data:StyleData):
     style = {
@@ -34,6 +27,8 @@ async def create_style(data:StyleData):
         "pinky": data.pinky,
         }
 
-    res = supabase.table('style').insert(style).execute()
-    print(res)
-    return res
+    unique = supabase.table('style').select('*').match(style).execute()
+    if unique.data == []:
+        res = supabase.table('style').insert(style).execute()
+        return res
+ 

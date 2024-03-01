@@ -19,15 +19,18 @@ class SupabaseReq:
     def _param_payload(self, params):
         return "&".join("%s=%s" % (k, v) for k, v in params.items())
 
-    def _headers(self, headers: dict):
-        return {**self.header, **headers}
+    def _headers(self, token, **kwargs):
+        if kwargs.get('custom_headers') is not None:
+            return {**self.header, **kwargs.get('custom_headers'), "Authorization":f"Bearer {token}"}
+        else:
+            return {**self.header, "Authorization":f"Bearer {token}"}
 
     def _url(self):
         return f"{self.url}/{self.endpoint}"
 
-    def get(self, headers, params):
+    def get(self, session_token, params):
         url = self._url()
-        header = self._headers(headers)
+        header = self._headers(token=session_token)
         param_string = self._param_payload(params)
         res = requests.get(
             url=url,

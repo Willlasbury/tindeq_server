@@ -22,7 +22,7 @@ router = APIRouter(prefix="/max_pull")
 @router.get("")
 async def get_max_pulls(request: Request):
     token = request.headers.get("Authorization")
-    res = requester.get(params={'select':'*'}, headers={"Authorization":f"Bearer {token}"})
+    res = requester.get(params={'select':'*'}, session_token=token)
     return res.json()
 
 # removed res modal remember to put back in

@@ -13,7 +13,7 @@ url: str = os.getenv("SUPABASE_URL")
 key: str = os.getenv("API_KEY")
 
 supabase: Client = create_client(url, key)
-
+requester = SupabaseReq(table='max_pull')
 
 router = APIRouter(prefix="/max_pull")
 
@@ -21,15 +21,8 @@ router = APIRouter(prefix="/max_pull")
 # ONLY WORKS WITH RLS DISABLED ON SUPABASE TABLE
 @router.get("")
 async def get_max_pulls(request: Request):
-    # res = supabase.table("max_pull").select("*").execute()
     token = request.headers.get("Authorization")
-    requester = SupabaseReq()
-    res = requester.get(headers={"Authorization":f"Bearer {token}"})
-    # res = requester.get(endpoint='max_pull', params={'select':'*'}, headers={"Authorization":f"Bearer {token}"})
-    print('res: ', res.json())
-    # if res.data == []:
-    #     raise HTTPException(status_code=404, detail="Could not find any data")
-    # return res.data
+    res = requester.get(params={'select':'*'}, headers={"Authorization":f"Bearer {token}"})
     return res.json()
 
 # removed res modal remember to put back in

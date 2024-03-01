@@ -10,14 +10,33 @@ key: str = os.getenv("API_KEY")
 
 
 class SupabaseReq:
-    def __init__(self) -> None:
+    def __init__(self, table=None) -> None:
         self.url = url
         self.key = key
+        self.endpoint = f"rest/v1/{table}" if table else "/auth/v1/token"
+        self.header = {"Content-Type": "application/json", "apikey": self.key}
 
-    def get(self, headers) -> Response:
-        # return requests.get(f"{self.url}/{endpoint}", params=params, headers={"apiKey": self.key, **headers})
-        res = requests.get(url="https://dkmvspmsglplyfthgrxb.supabase.co/rest/v1/max_pull?select=*", headers={"apiKey": self.key, **headers})
+    def _param_payload(self, params):
+        return "&".join("%s=%s" % (k, v) for k, v in params.items())
+
+    def _headers(self, headers: dict):
+        return {**self.header, **headers}
+
+    def _url(self):
+        return f"{self.url}/{self.endpoint}"
+
+    def get(self, headers, params):
+        url = self._url()
+        header = self._headers(headers)
+        param_string = self._param_payload(params)
+        res = requests.get(
+            url=url,
+            params=param_string,
+            headers=header,
+        )
         return res
 
     def post(self, endpoint, json, headers):
-        requests.post(f"{self.url}/{endpoint}", json=json, headers={"apiKey": self.key, **headers})
+        requests.post(
+            f"{self.url}/{endpoint}", json=json, headers={"apiKey": self.key, **headers}
+        )

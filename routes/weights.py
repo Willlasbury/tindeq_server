@@ -30,6 +30,8 @@ async def create_max_pull(
     data:WeightData,
     request: Request,
 ):
+    print('data: ', data)
+    print('\ntest\n')
     style = {
         "edge_size_mm": data.style.edge_size_mm,
         "grip": data.style.grip,
@@ -60,13 +62,11 @@ async def create_max_pull(
         return res
         # return {'message':"sucess"}
     except Exception as e:
-
-        return {'message':"error"}
-        # raise HTTPException(status_code=400, detail=e.message)
+        raise HTTPException(status_code=400, detail=e)
     
 
 # Delete this end point as soon as you want to store real data
-@router.delete("")
-async def delete_max_pulls():
-    res = supabase.table("max_pull").delete().neq("id", 0).execute()
-    return res
+# @router.delete("")
+# async def delete_max_pulls():
+#     res = supabase.table("max_pull").delete().neq("id", 0).execute()
+#     return res

@@ -22,7 +22,7 @@ class SupabaseReq:
         # self.storage_url = f"{supabase_url}/storage/v1"
         # self.functions_url = f"{supabase_url}/functions/v1"
         
-        self.header = {"Content-Type": "application/json", "apikey": self.key}
+        self.header = {"Content-Type": "application/json", "apikey": self.key, "Prefer": "return=minimal"}
     
     def _eq(self, params):
         return
@@ -63,17 +63,6 @@ class SupabaseReq:
         )
         return res.json()
 
-    def post(self, table, session_token, json):
-
-        url = self._url(self.rest_url, table)
-        headers = self._headers(token=session_token)
-        res = requests.post(
-            url=url,
-            headers=headers,
-            json=json
-        )
-        return res 
-
     def get_where(self, table, session_token, params):
         url = self._url(self.rest_url, table)
         headers = self._headers(token=session_token)
@@ -84,3 +73,14 @@ class SupabaseReq:
             headers=headers,
         )
         return res.json()
+    
+    def post(self, table, session_token, json):
+
+        url = self._url(self.rest_url, table)
+        headers = self._headers(token=session_token)
+        res = requests.post(
+            url=url,
+            headers=headers,
+            json=json
+        )
+        return res

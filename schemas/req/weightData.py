@@ -1,4 +1,6 @@
 from pydantic import BaseModel
+from schemas.req.styleData import StyleData
 
-class Weight(BaseModel):
+class WeightData(BaseModel):
     weight: float
+    style: StyleData

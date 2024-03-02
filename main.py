@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routes import tindeq, weights, users
+from routes import tindeq, weights, users, grip_style
 
 app = FastAPI()
 
@@ -17,3 +17,4 @@ app.add_middleware(
 app.include_router(users.router)
 app.include_router(tindeq.router)
 app.include_router(weights.router)
+app.include_router(grip_style.router)

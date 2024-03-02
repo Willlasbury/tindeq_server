@@ -2,8 +2,6 @@ import struct
 from fastapi import HTTPException
 # from session import Session
 
-
-
 class TindeqHandler:
 
     def handleData(self, str):

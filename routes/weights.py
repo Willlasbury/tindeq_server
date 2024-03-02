@@ -22,7 +22,7 @@ router = APIRouter(prefix="/max_pull")
 async def get_max_pulls(request: Request):
     token = request.headers.get("Authorization")
     res = requester.get(table='max_pull', params={'select':'*'}, session_token=token)
-    return res.json()
+    return res
 
 # removed res modal remember to put back in
 @router.post("", status_code=status.HTTP_201_CREATED)
@@ -44,32 +44,25 @@ async def create_max_pull(
 
     # get user data
     user_data = requester.get_user_data(token)
-    return {'data':user_data.json()}
-    # user_id = user_data.user.id
+    user_id = user_data.get("id")
+    
+    # get style id
+    style_data = requester.get_where(table='style', session_token=token, params=style)
+    style_id = style_data[0].get('id')
 
-    #get style id
-    # style = supabase.table('style').select('*').match(style).execute()
-    # style_id = style.data[0].get('id')
-    # if unique.data == []:
-    #     style_data = supabase.table('style').insert(style).execute()
-    # return token, supabase._auth_token
-    # print('data: ', data)
     obj = {
         "user_id":user_id,
         "style_id": style_id,
         "weight_kg": data.weight
     }
-    # try:
-        # supabase._auth_token = {'apiKey': key, 'Authorization': f"Bearer {token}"}
-        # print('\nsupabase auth header: ', supabase._get_token_header(),"\n")
-    #     res = supabase.table("max_pull").insert(obj).execute()
-    #     # res = requests.post("https://dkmvspmsglplyfthgrxb.supabase.co/rest/v1/max_pull", json=obj, headers={'apiKey': key, 'Authorization': f"Bearer {token}"})
-    #     return res
-    #     # return {'message':"sucess"}
-    # except Exception as e:
+    try:
+        res = requester.post(table='max_pull', session_token=token, json=obj)
+        return res
+        # return {'message':"sucess"}
+    except Exception as e:
 
-    #     return {'message':"error"}
-    #     # raise HTTPException(status_code=400, detail=e.message)
+        return {'message':"error"}
+        # raise HTTPException(status_code=400, detail=e.message)
     
 
 # Delete this end point as soon as you want to store real data

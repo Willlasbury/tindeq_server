@@ -23,6 +23,9 @@ class SupabaseReq:
         # self.functions_url = f"{supabase_url}/functions/v1"
         
         self.header = {"Content-Type": "application/json", "apikey": self.key}
+    
+    def _eq(self, params):
+        return
 
     def _end_point(self, table):
         return f"rest/v1/{table}" 
@@ -47,12 +50,10 @@ class SupabaseReq:
         # param_string = self._param_payload({'grant_type':'password'})
         headers = self._headers(token=session_token)
         res = requests.get(url=self._url(self.auth_url, 'user'), headers=headers)
-        print('res: ', res.request.url)
-        return res
+        return res.json()
 
     def get(self, table, session_token, params):
         url = self._url(self.rest_url, table)
-        print('url: ', url)
         headers = self._headers(token=session_token)
         param_string = self._param_payload(params)
         res = requests.get(
@@ -60,15 +61,26 @@ class SupabaseReq:
             params=param_string,
             headers=headers,
         )
-        return res
+        return res.json()
 
-    def post(self, session_token, json):
-        url = self._url()
+    def post(self, table, session_token, json):
+
+        url = self._url(self.rest_url, table)
         headers = self._headers(token=session_token)
-        res = requests.get(
+        res = requests.post(
             url=url,
             headers=headers,
             json=json
         )
-        return res
+        return res 
 
+    def get_where(self, table, session_token, params):
+        url = self._url(self.rest_url, table)
+        headers = self._headers(token=session_token)
+        param_string = "&".join("%s=eq.%s" % (k, v) for k, v in params.items())
+        res = requests.get(
+            url=url,
+            params=param_string,
+            headers=headers,
+        )
+        return res.json()

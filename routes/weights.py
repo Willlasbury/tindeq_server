@@ -47,16 +47,23 @@ async def create_max_pull(
     # get user data
     user_data = requester.get_user_data(token)
     user_id = user_data.get("id")
-    
+    print('\ntest\n')
     # get style id
-    style_data = requester.get_where(table='style', session_token=token, params=style)
-    style_id = style_data[0].get('id')
-
+    try:
+        style_data = requester.get_where(table='style', session_token=token, params=style)
+        style_id = style_data[0].get('id')
+    except:
+        print('\ntest\n')
+        style_data = requester.post('style', session_token=token, json=style)
+        print('style_data: ', style_data)
+        style_id = style_data[0].get('id')
+        
     obj = {
         "user_id":user_id,
         "style_id": style_id,
         "weight_kg": data.weight
     }
+    print('obj: ', obj)
     try:
         res = requester.post(table='max_pull', session_token=token, json=obj)
         return res

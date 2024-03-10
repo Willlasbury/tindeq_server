@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from fastapi import APIRouter, HTTPException, status, Request
 from supabase import create_client, Client 
 from models.Supabase import SupabaseReq
@@ -30,8 +32,6 @@ async def create_max_pull(
     data:WeightData,
     request: Request,
 ):
-    print('data: ', data)
-    print('\ntest\n')
     style = {
         "edge_size_mm": data.style.edge_size_mm,
         "grip": data.style.grip,
@@ -47,26 +47,20 @@ async def create_max_pull(
     # get user data
     user_data = requester.get_user_data(token)
     user_id = user_data.get("id")
-    
     # get style id
-    style_data = requester.get_where(table='style', session_token=token, params=style)
+    style_res = requester.get_where(table='style', session_token=token, params=style)
+    style_data = style_res.json()
     style_id = style_data[0].get('id')
-
+        
     obj = {
         "user_id":user_id,
         "style_id": style_id,
-        "weight_kg": data.weight
+        "weight_kg": data.weight,
+        "date": str(datetime.now())
     }
     try:
         res = requester.post(table='max_pull', session_token=token, json=obj)
         return res
-        # return {'message':"sucess"}
     except Exception as e:
+        print('error: ', e)
         raise HTTPException(status_code=400, detail=e)
-    
-
-# Delete this end point as soon as you want to store real data
-# @router.delete("")
-# async def delete_max_pulls():
-#     res = supabase.table("max_pull").delete().neq("id", 0).execute()
-#     return res

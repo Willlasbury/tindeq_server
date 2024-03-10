@@ -72,10 +72,9 @@ class SupabaseReq:
             params=param_string,
             headers=headers,
         )
-        return res.json()
+        return res
     
     def post(self, table, session_token, json):
-
         url = self._url(self.rest_url, table)
         headers = self._headers(token=session_token)
         res = requests.post(

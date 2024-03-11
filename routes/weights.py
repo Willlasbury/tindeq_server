@@ -14,10 +14,15 @@ load_dotenv()
 url: str = os.getenv("SUPABASE_URL")
 key: str = os.getenv("API_KEY")
 
+from models.beta import SupabaseWrapper
+
 supabase: Client = create_client(url, key)
 requester = SupabaseReq(table='max_pull')
 
 router = APIRouter(prefix="/max_pull")
+
+# testing wrapper function to adjust headers
+
 
 # ONLY WORKS WITH RLS DISABLED ON SUPABASE TABLE
 @router.get("")
@@ -25,6 +30,41 @@ async def get_max_pulls(request: Request):
     token = request.headers.get("Authorization")
     res = requester.get(table='max_pull', params={'select':'*'}, session_token=token)
     return res
+
+
+@router.get("/recent")
+async def get_users_max_pull(request: Request):
+    token = request.headers.get("Authorization")
+    user_data = requester.get_user_data(token)
+    user_id = user_data.get('id')
+    params = {
+        'user_id':user_id,
+    }
+    max_pull_res = requester.get_where(table='max_pull', params=params, session_token=token)
+    max_pull_data = max_pull_res.json()
+    return max_pull_data[-1]
+
+@router.get("/highest")
+async def get_users_max_pull(request: Request):
+    token = request.headers.get("Authorization")
+    user_data = requester.get_user_data(token)
+    user_id = user_data.get('id')
+    params = {
+        'user_id':user_id,
+    }
+
+    max_pull_res = requester.get_where(table='max_pull', params=params, session_token=token)
+    max_pull_data = max_pull_res.json()
+
+    #filter through for max
+    max = max_pull_data[0].get('weight_kg')
+    for i in max_pull_data:
+        weight = i.get('weight_kg')
+        if weight > max:
+            max = weight
+
+
+    return {'max_weight_kg': max}
 
 # removed res modal remember to put back in
 @router.post("", status_code=status.HTTP_201_CREATED)
@@ -41,7 +81,6 @@ async def create_max_pull(
         "ring": data.style.ring,
         "pinky": data.style.pinky,
         }
-    
     token = request.headers.get("Authorization")
 
     # get user data

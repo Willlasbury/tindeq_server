@@ -66,12 +66,15 @@ class SupabaseReq:
     def get_where(self, table, session_token, params):
         url = self._url(self.rest_url, table)
         headers = self._headers(token=session_token)
+        print('\ntest\n')
         param_string = "&".join("%s=eq.%s" % (k, v) for k, v in params.items())
+        print('param_string: ', param_string)
         res = requests.get(
             url=url,
             params=param_string,
             headers=headers,
         )
+        print('res1: ', res)
         return res
     
     def post(self, table, session_token, json):

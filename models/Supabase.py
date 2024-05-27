@@ -8,7 +8,6 @@ load_dotenv()
 supabase_url: str = os.getenv("SUPABASE_URL")
 key: str = os.getenv("API_KEY")
 
-
 class SupabaseReq:
     def __init__(self):
         self.url = supabase_url
@@ -23,14 +22,11 @@ class SupabaseReq:
         # self.functions_url = f"{supabase_url}/functions/v1"
         
         self.header = {"Content-Type": "application/json", "apikey": self.key, "Prefer": "return=minimal"}
-
-    def _end_point(self, table):
-        return f"rest/v1/{table}" 
     
-    # create custom string to add as params since I am having trouble 
-    #   with special character (e.g. *) returning as %... 
-    def _param_payload(self, params): 
-        return "&".join("%s=%s" % (k, v) for k, v in params.items())
+    # take the supabase request and extract the params from the dict 
+    @staticmethod
+    def _param_stripper(supabase_req):
+        return supabase_req.__dict__.get('params')
 
     # add any headers other than the default
     def _headers(self, token, **kwargs):
@@ -44,37 +40,22 @@ class SupabaseReq:
         return f"{self.url}/{type}/{endpoint}"
 
     def get_user_data(self, session_token):
-        # param_string = self._param_payload({'grant_type':'password'})
         headers = self._headers(token=session_token)
-        res = requests.get(url=self._url(self.auth_url, 'user'), headers=headers)
+        user_url = self._url(self.auth_url, 'user')
+        res = requests.get(url=user_url, headers=headers)
         return res.json()
 
-    def get(self, table, session_token, params):
+    def get(self, table, session_token, supa_dict):
         url = self._url(self.rest_url, table)
         headers = self._headers(token=session_token)
-        # param_string = self._param_payload(params)
-        res = requests.get(
-            url=url,
-            # params=param_string,
-            params=params,
-            headers=headers,
-        )
-        return res.json()
-
-    def get_where(self, table, session_token, params):
-        url = self._url(self.rest_url, table)
-        headers = self._headers(token=session_token)
-        print('\ntest\n')
-        param_string = "&".join("%s=eq.%s" % (k, v) for k, v in params.items())
-        print('param_string: ', param_string)
+        param_string = self._param_stripper(supa_dict)
         res = requests.get(
             url=url,
             params=param_string,
             headers=headers,
         )
-        print('res1: ', res.__dict__)
         return res.json()
-    
+
     def post(self, table, session_token, json):
         url = self._url(self.rest_url, table)
         headers = self._headers(token=session_token)

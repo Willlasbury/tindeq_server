@@ -14,6 +14,8 @@ load_dotenv()
 url: str = os.getenv("SUPABASE_URL")
 key: str = os.getenv("API_KEY")
 
+supa: Client = create_client(url, key)
+
 sreq = SupabaseReq()
 
 router = APIRouter(prefix="/max_pull")
@@ -24,11 +26,11 @@ router = APIRouter(prefix="/max_pull")
 # ONLY WORKS WITH RLS DISABLED ON SUPABASE TABLE
 @router.get("")
 async def get_max_pulls(request: Request):
-    supa: Client = create_client(url, key)
-    res = supa.table('max_pull').select('weight_kg, style(grip)').eq('weight_kg', 100.02)
-    param_string = res.__dict__.get('params')
+    # build a request from supabase. We will use it to create a param string and then
+    # use that with the custom request
+    supa_dict = supa.table('max_pull').select('*').eq('weight_kg', 100.02)
     token = request.headers.get("Authorization")
-    res = sreq.get(table='max_pull', params=param_string, session_token=token)
+    res = sreq.get(table='max_pull', supa_dict=supa_dict, session_token=token)
     return res
 
 
@@ -87,10 +89,15 @@ async def create_max_pull(
     user_data = sreq.get_user_data(token)
     user_id = user_data.get("id")
     # get style id
-    style_res = sreq.get_where(table='style', session_token=token, params=style)
-    print('style_res: ', style_res)
-    style_id = style_res[0].get('id')
-        
+    
+    supa_dict = supa.table('style').select('*')
+
+    for k,v in style.items():
+        supa_dict.eq(f'{k}', v)
+
+    style = sreq.get(table='style', session_token=token, supa_dict=supa_dict)
+    style_id = style[0].get('id')
+
     obj = {
         "user_id":user_id,
         "style_id": style_id,

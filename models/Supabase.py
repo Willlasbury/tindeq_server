@@ -10,7 +10,7 @@ key: str = os.getenv("API_KEY")
 
 
 class SupabaseReq:
-    def __init__(self, table=None) -> None:
+    def __init__(self):
         self.url = supabase_url
         self.key = key
         self.auth_url = "auth/v1"
@@ -23,9 +23,6 @@ class SupabaseReq:
         # self.functions_url = f"{supabase_url}/functions/v1"
         
         self.header = {"Content-Type": "application/json", "apikey": self.key, "Prefer": "return=minimal"}
-    
-    def _eq(self, params):
-        return
 
     def _end_point(self, table):
         return f"rest/v1/{table}" 
@@ -55,10 +52,11 @@ class SupabaseReq:
     def get(self, table, session_token, params):
         url = self._url(self.rest_url, table)
         headers = self._headers(token=session_token)
-        param_string = self._param_payload(params)
+        # param_string = self._param_payload(params)
         res = requests.get(
             url=url,
-            params=param_string,
+            # params=param_string,
+            params=params,
             headers=headers,
         )
         return res.json()
@@ -74,8 +72,8 @@ class SupabaseReq:
             params=param_string,
             headers=headers,
         )
-        print('res1: ', res)
-        return res
+        print('res1: ', res.__dict__)
+        return res.json()
     
     def post(self, table, session_token, json):
         url = self._url(self.rest_url, table)

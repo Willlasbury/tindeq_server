@@ -52,6 +52,7 @@ async def get_users_max_pull(request: Request) -> MaxWeightRes:
         el = max_pull_res[i]
         data = el if el.get('weight_kg') > max else data
     del data['style']['id']
+    print('data: ', data)
     return data
 
 # removed res modal remember to put back in

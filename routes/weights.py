@@ -42,8 +42,8 @@ async def get_users_max_pull(request: Request):
     max_pull_res = sreq.get(table='max_pull', supa_dict=supa_dict, session_token=token)
     return max_pull_res[0]
 
-@router.get("/highest")
-async def get_users_max_pull(request: Request) -> MaxWeightRes:
+@router.get("/highest", response_model=MaxWeightRes)
+async def get_users_max_pull(request: Request):
     token = request.headers.get("Authorization")
     supa_dict = supa.table('max_pull').select('weight_kg', 'style(*)')
     max_pull_res = sreq.get(table='max_pull', session_token=token, supa_dict=supa_dict)
@@ -52,7 +52,6 @@ async def get_users_max_pull(request: Request) -> MaxWeightRes:
         el = max_pull_res[i]
         data = el if el.get('weight_kg') > max else data
     del data['style']['id']
-    print('data: ', data)
     return data
 
 # removed res modal remember to put back in

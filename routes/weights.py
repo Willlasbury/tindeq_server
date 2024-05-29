@@ -23,14 +23,11 @@ router = APIRouter(prefix="/max_pull")
 # testing wrapper function to adjust headers
 
 
-# ONLY WORKS WITH RLS DISABLED ON SUPABASE TABLE
-@router.get("")
+@router.get("/test")
 async def get_max_pulls(request: Request):
-    # build a request from supabase. We will use it to create a param string and then
-    # use that with the custom request
-    supa_dict = supa.table('max_pull').select('*').eq('weight_kg', 100.02)
     token = request.headers.get("Authorization")
-    res = sreq.get(table='max_pull', supa_dict=supa_dict, session_token=token)
+    res = sreq.rpc(endpoint='test')
+    print('res: ', res)
     return res
 
 
@@ -39,33 +36,22 @@ async def get_users_max_pull(request: Request):
     token = request.headers.get("Authorization")
     user_data = sreq.get_user_data(token)
     user_id = user_data.get('id')
-    params = {
-        'user_id':user_id,
-    }
-    max_pull_res = sreq.get_where(table='max_pull', params=params, session_token=token)
-    max_pull_data = max_pull_res.json()
-    return max_pull_data[-1]
+    
+    supa_dict = supa.table('max_pull').select('*').order('date', desc=True)
+
+    max_pull_res = sreq.get(table='max_pull', supa_dict=supa_dict, session_token=token)
+    return max_pull_res[0]
 
 @router.get("/highest")
 async def get_users_max_pull(request: Request):
     token = request.headers.get("Authorization")
-    user_data = sreq.get_user_data(token)
-    user_id = user_data.get('id')
-    params = {
-        'user_id':user_id,
-    }
-
-    max_pull_res = sreq.get_where(table='max_pull', params=params, session_token=token)
-    max_pull_data = max_pull_res.json()
-
-    #filter through for max
-    max = max_pull_data[0].get('weight_kg')
-    for i in max_pull_data:
-        weight = i.get('weight_kg')
-        if weight > max:
-            max = weight
-
-
+    supa_dict = supa.table('max_pull').select('weight_kg')
+    max_pull_res = sreq.get(table='max_pull', session_token=token, supa_dict=supa_dict)
+    max = -1
+    for i in max_pull_res:
+        i = i.get('weight_kg')
+        max = i if i > max else max
+        
     return {'max_weight_kg': max}
 
 # removed res modal remember to put back in

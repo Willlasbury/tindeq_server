@@ -65,3 +65,14 @@ class SupabaseReq:
             json=json
         )
         return res
+    
+    def rpc(self, session_token, endpoint):
+        url = self._url(type='rpc', endpoint=endpoint)
+        headers =  self._headers(token=session_token)
+        # param_string = self._param_stripper(supa_dict)
+        res = requests.get(
+            url=url,
+            headers=headers,
+            # params=param_string
+        )
+        return res

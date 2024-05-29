@@ -1,7 +1,6 @@
 from datetime import datetime
-
+from supabase import Client, create_client
 from fastapi import APIRouter, HTTPException, status, Request
-from supabase import create_client, Client 
 from models.Supabase import SupabaseReq
 from schemas.req.weightData import WeightData
 from schemas.res.max_weight import MaxWeightRes
@@ -9,61 +8,50 @@ from schemas.res.max_weight import MaxWeightRes
 import os
 from dotenv import load_dotenv
 
+
 load_dotenv()
 
 url: str = os.getenv("SUPABASE_URL")
 key: str = os.getenv("API_KEY")
 
-from models.beta import SupabaseWrapper
+supa: Client = create_client(url, key)
 
-supabase: Client = create_client(url, key)
-requester = SupabaseReq(table='max_pull')
+sreq = SupabaseReq()
 
 router = APIRouter(prefix="/max_pull")
 
 # testing wrapper function to adjust headers
 
 
-# ONLY WORKS WITH RLS DISABLED ON SUPABASE TABLE
-@router.get("")
+@router.get("/test")
 async def get_max_pulls(request: Request):
     token = request.headers.get("Authorization")
-    res = requester.get(table='max_pull', params={'select':'*'}, session_token=token)
+    res = sreq.rpc(endpoint='test')
+    print('res: ', res)
     return res
 
 
 @router.get("/recent")
 async def get_users_max_pull(request: Request):
     token = request.headers.get("Authorization")
-    user_data = requester.get_user_data(token)
+    user_data = sreq.get_user_data(token)
     user_id = user_data.get('id')
-    params = {
-        'user_id':user_id,
-    }
-    max_pull_res = requester.get_where(table='max_pull', params=params, session_token=token)
-    max_pull_data = max_pull_res.json()
-    return max_pull_data[-1]
+    
+    supa_dict = supa.table('max_pull').select('*').order('date', desc=True)
+
+    max_pull_res = sreq.get(table='max_pull', supa_dict=supa_dict, session_token=token)
+    return max_pull_res[0]
 
 @router.get("/highest")
 async def get_users_max_pull(request: Request):
     token = request.headers.get("Authorization")
-    user_data = requester.get_user_data(token)
-    user_id = user_data.get('id')
-    params = {
-        'user_id':user_id,
-    }
-
-    max_pull_res = requester.get_where(table='max_pull', params=params, session_token=token)
-    max_pull_data = max_pull_res.json()
-
-    #filter through for max
-    max = max_pull_data[0].get('weight_kg')
-    for i in max_pull_data:
-        weight = i.get('weight_kg')
-        if weight > max:
-            max = weight
-
-
+    supa_dict = supa.table('max_pull').select('weight_kg')
+    max_pull_res = sreq.get(table='max_pull', session_token=token, supa_dict=supa_dict)
+    max = -1
+    for i in max_pull_res:
+        i = i.get('weight_kg')
+        max = i if i > max else max
+        
     return {'max_weight_kg': max}
 
 # removed res modal remember to put back in
@@ -84,13 +72,18 @@ async def create_max_pull(
     token = request.headers.get("Authorization")
 
     # get user data
-    user_data = requester.get_user_data(token)
+    user_data = sreq.get_user_data(token)
     user_id = user_data.get("id")
     # get style id
-    style_res = requester.get_where(table='style', session_token=token, params=style)
-    style_data = style_res.json()
-    style_id = style_data[0].get('id')
-        
+    
+    supa_dict = supa.table('style').select('*')
+
+    for k,v in style.items():
+        supa_dict.eq(f'{k}', v)
+
+    style = sreq.get(table='style', session_token=token, supa_dict=supa_dict)
+    style_id = style[0].get('id')
+
     obj = {
         "user_id":user_id,
         "style_id": style_id,
@@ -98,7 +91,7 @@ async def create_max_pull(
         "date": str(datetime.now())
     }
     try:
-        res = requester.post(table='max_pull', session_token=token, json=obj)
+        res = sreq.post(table='max_pull', session_token=token, json=obj)
         return res
     except Exception as e:
         print('error: ', e)

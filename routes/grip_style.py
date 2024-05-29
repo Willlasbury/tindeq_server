@@ -15,6 +15,7 @@ supabase: Client = create_client(url, key)
 
 router = APIRouter(prefix="/style")
 
+# used for filling out style table with all possible combos
 @router.post("")
 async def create_style(data:StyleData):
     style = {

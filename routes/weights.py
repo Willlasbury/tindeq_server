@@ -91,39 +91,42 @@ async def create_max_pull(
     data:WeightData,
     request: Request,
 ):
-    style = {
-        "edge_size_mm": data.style.edge_size_mm,
-        "grip": data.style.grip,
-        "hand": data.style.hand,
-        "index": data.style.index,
-        "middle": data.style.middle,
-        "ring": data.style.ring,
-        "pinky": data.style.pinky,
-        }
-    token = request.headers.get("Authorization")
-
-    # get user data
-    user_data = sreq.get_user_data(token)
-    user_id = user_data.get("id")
-
-    # get style id
-    supa_dict = supa.table('style').select('*')
-
-    for k,v in style.items():
-        supa_dict.eq(f'{k}', v)
-
-    style = sreq.get(table='style', session_token=token, supa_dict=supa_dict)
-    style_id = style[0].get('id')
-
-    obj = {
-        "user_id":user_id,
-        "style_id": style_id,
-        "weight_kg": data.weight,
-        "date": str(datetime.now())
-    }
-
     try:
-        res = sreq.post(table='max_pull', session_token=token, json=obj)
-        return res
+        style = {
+            "edge_size_mm": data.style.edge_size_mm,
+            "grip": data.style.grip,
+            "hand": data.style.hand,
+            "index": data.style.index,
+            "middle": data.style.middle,
+            "ring": data.style.ring,
+            "pinky": data.style.pinky,
+            }
+        token = request.headers.get("Authorization")
+
+        # get user data
+        user_data = sreq.get_user_data(token)
+        user_id = user_data.get("id")
+
+        # get style id
+        supa_dict = supa.table('style').select('*')
+
+        for k,v in style.items():
+            supa_dict.eq(f'{k}', v)
+
+        style = sreq.get(table='style', session_token=token, supa_dict=supa_dict)
+        style_id = style[0].get('id')
+
+        obj = {
+            "user_id":user_id,
+            "style_id": style_id,
+            "weight_kg": data.weight,
+            "date": str(datetime.now())
+        }
+
+        try:
+            res = sreq.post(table='max_pull', session_token=token, json=obj)
+            return res
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=e)
     except Exception as e:
-        raise HTTPException(status_code=400, detail=e)
+        raise HTTPException(status_code=404, detail=e)

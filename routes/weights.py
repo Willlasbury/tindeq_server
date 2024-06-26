@@ -44,18 +44,22 @@ async def get_users_max_pull(request: Request):
 
 @router.get("/highest", response_model=MaxWeightRes)
 async def get_users_max_pull(request: Request):
-    token = request.headers.get("Authorization")
-    supa_dict = supa.table('max_pull').select('weight_kg', 'style(*)')
-    max_pull_res = sreq.get(table='max_pull', session_token=token, supa_dict=supa_dict)
-    if max_pull_res == []:
-        raise HTTPException(status_code=204, detail='No data found in database')
-    max = -1
-    for i in range(len(max_pull_res)):
-        el = max_pull_res[i]
-        data = el if el.get('weight_kg') > max else data
-    del data['style']['id']
-    return data
+    try:
+        token = request.headers.get("Authorization")
+        supa_dict = supa.table('max_pull').select('weight_kg', 'style(*)')
+        max_pull_res = sreq.get(table='max_pull', session_token=token, supa_dict=supa_dict)
     
+        max = -1
+        if max_pull_res == []:
+            raise HTTPException(status_code=204, detail='No data found in database')
+        max = -1
+        for i in range(len(max_pull_res)):
+            el = max_pull_res[i]
+            data = el if el.get('weight_kg') > max else data
+        del data['style']['id']
+        return data
+    except Exception as e:
+        raise HTTPException(status_code=404, detail=f'you got errors: {e}')
 
 @router.get("/highest/{style_hand}", response_model=MaxWeightRes)
 async def get_users_max_pull(style_hand: str, request: Request):
@@ -87,39 +91,42 @@ async def create_max_pull(
     data:WeightData,
     request: Request,
 ):
-    style = {
-        "edge_size_mm": data.style.edge_size_mm,
-        "grip": data.style.grip,
-        "hand": data.style.hand,
-        "index": data.style.index,
-        "middle": data.style.middle,
-        "ring": data.style.ring,
-        "pinky": data.style.pinky,
-        }
-    token = request.headers.get("Authorization")
-
-    # get user data
-    user_data = sreq.get_user_data(token)
-    user_id = user_data.get("id")
-
-    # get style id
-    supa_dict = supa.table('style').select('*')
-
-    for k,v in style.items():
-        supa_dict.eq(f'{k}', v)
-
-    style = sreq.get(table='style', session_token=token, supa_dict=supa_dict)
-    style_id = style[0].get('id')
-
-    obj = {
-        "user_id":user_id,
-        "style_id": style_id,
-        "weight_kg": data.weight,
-        "date": str(datetime.now())
-    }
-
     try:
-        res = sreq.post(table='max_pull', session_token=token, json=obj)
-        return res
+        style = {
+            "edge_size_mm": data.style.edge_size_mm,
+            "grip": data.style.grip,
+            "hand": data.style.hand,
+            "index": data.style.index,
+            "middle": data.style.middle,
+            "ring": data.style.ring,
+            "pinky": data.style.pinky,
+            }
+        token = request.headers.get("Authorization")
+
+        # get user data
+        user_data = sreq.get_user_data(token)
+        user_id = user_data.get("id")
+
+        # get style id
+        supa_dict = supa.table('style').select('*')
+
+        for k,v in style.items():
+            supa_dict.eq(f'{k}', v)
+
+        style = sreq.get(table='style', session_token=token, supa_dict=supa_dict)
+        style_id = style[0].get('id')
+
+        obj = {
+            "user_id":user_id,
+            "style_id": style_id,
+            "weight_kg": data.weight,
+            "date": str(datetime.now())
+        }
+
+        try:
+            res = sreq.post(table='max_pull', session_token=token, json=obj)
+            return res
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=e)
     except Exception as e:
-        raise HTTPException(status_code=400, detail=e)
+        raise HTTPException(status_code=404, detail=e)

@@ -28,12 +28,13 @@ async def check_session_token(request: Request):
     else: 
        raise HTTPException(status_code=404, detail="Could not refresh token")
 
-@router.get("")
-async def get_all_users():
-    res = supabase.auth.get_user()
-    if res.data == []:
-        raise HTTPException(status_code=404, detail="Could not find any data")
-    return res.data
+# not working
+# @router.get("")
+# async def get_all_users():
+#     res = supabase.auth.get_user()
+#     if res.data == []:
+#         raise HTTPException(status_code=404, detail="Could not find any data")
+#     return res.data
 
 @router.post("")
 async def create_user(data:User):
@@ -48,10 +49,7 @@ async def create_user(data:User):
 
 @router.post("/login")
 async def create_user(data:Login):
-    user = {
-        "email": data.email,
-        "password": data.password,
-    }
 
-    res = supabase.auth.sign_in_with_password(user)
+    # res = supabase.auth.sign_in_with_password(user)
+    res = supabase.auth.sign_in(email=data.email, password=data.password)
     return res

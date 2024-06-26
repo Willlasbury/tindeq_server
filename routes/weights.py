@@ -25,10 +25,7 @@ router = APIRouter(prefix="/max_pull")
 
 @router.get("/test")
 async def get_max_pulls(request: Request):
-    token = request.headers.get("Authorization")
-    res = sreq.rpc(endpoint='test')
-    print('res: ', res)
-    return res
+    return {"test":"test"}
 
 
 @router.get("/recent")

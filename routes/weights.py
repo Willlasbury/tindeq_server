@@ -58,15 +58,21 @@ async def get_users_max_pull(request: Request):
     except Exception as e:
         raise HTTPException(status_code=404, detail=f'you got errors: {e}')
 
-@router.get("/highest/{style_hand}", response_model=MaxWeightRes)
+# @router.get("/highest/{style_hand}", response_model=MaxWeightRes)
+@router.get("/highest/{style_hand}")
 async def get_users_max_pull(style_hand: str, request: Request):
     try:
         if style_hand not in ['left','right']:
             raise HTTPException(status_code=404, detail='Hand choice not in styles')
         else:
             token = request.headers.get("Authorization")
-            supa_dict = supa.table('max_pull').select('weight_kg', 'style(*)').eq('style.hand', style_hand)
+            supa_dict = supa.table('max_pull').select('weight_kg', 'style(*)').eq('style.fdsa', 1)
+            print('supa_dict: ', supa_dict)
             max_pull_res = sreq.get(table='max_pull', session_token=token, supa_dict=supa_dict)
+            print('max_pull_res: ', max_pull_res)
+            return {"res":max_pull_res}
+            if max_pull_res == []:
+                raise HTTPException(status_code=204, detail='No data found in database')
             max = -1
             for i in range(len(max_pull_res)):
                 el = max_pull_res[i]

@@ -2,7 +2,6 @@
 # from routes.weights import delete_max_weights
 from routes.grip_style import create_style
 from routes.tindeq import root
-import numpy as np
 
 from models.weight import Weight
 from models.styles import Style

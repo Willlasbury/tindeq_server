@@ -25,10 +25,7 @@ router = APIRouter(prefix="/max_pull")
 
 @router.get("/test")
 async def get_max_pulls(request: Request):
-    token = request.headers.get("Authorization")
-    res = sreq.rpc(endpoint='test')
-    print('res: ', res)
-    return res
+    return {"test":"test"}
 
 
 @router.get("/recent")
@@ -70,20 +67,29 @@ async def get_users_max_pull(style_hand: str, request: Request):
             token = request.headers.get("Authorization")
             supa_dict = supa.table('max_pull').select('weight_kg', 'style(*)').eq('style.hand', style_hand)
             max_pull_res = sreq.get(table='max_pull', session_token=token, supa_dict=supa_dict)
+            if max_pull_res == []:
+                raise HTTPException(status_code=204, detail='No data found in database')
             max = -1
+            data = max_pull_res[0]
             for i in range(len(max_pull_res)):
                 el = max_pull_res[i]
                 # filter out style = None from data
                 # if style.hand = left Supabase won't remove style.hand = right if from the response, it just puts style = None 
                 # where {weight_kg = num, style = None}
-                if el.get('style') == None:
+                if el.get('style') == 'None':
                     continue
                 data = el if el.get('weight_kg') > max else data
-            del data['style']['id']
+            
+            # This block is in case the first instance for data had the wrong hand and then there were no records that
+            # replaced it later on
+            if data.get('style') == None:
+                print('\ntest\n')
+                return HTTPException(status_code=204, detail='No data found in database')
+            # print('\ntest\n')
             return data
     except Exception as e:
-        print('error: ', e)
-        raise HTTPException(status_code=400, detail=e)
+        print('\ntest\n')
+        return HTTPException(status_code=400, detail=e)
 
 # removed res modal remember to put back in
 @router.post("", status_code=status.HTTP_201_CREATED)

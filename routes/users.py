@@ -49,7 +49,11 @@ async def create_user(data:User):
 
 @router.post("/login")
 async def create_user(data:Login):
-
-    # res = supabase.auth.sign_in_with_password(user)
-    res = supabase.auth.sign_in(email=data.email, password=data.password)
+    user = {
+        "email": data.email,
+        "password": data.password,
+    }
+    
+    res = supabase.auth.sign_in_with_password(user)
+    # res = supabase.auth.sign_in(email=data.email, password=data.password)
     return res

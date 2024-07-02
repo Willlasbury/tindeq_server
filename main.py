@@ -4,7 +4,7 @@ from routes import tindeq, weights, users, grip_style
 
 app = FastAPI()
 
-origins = ["http://localhost:5173", "http://localhost:4173", "https://main--fingertester.netlify.app"]
+origins = ["http://localhost:5173", "http://localhost:4173", "https://fingertester.netlify.app"]
 
 app.add_middleware(
     CORSMiddleware,
